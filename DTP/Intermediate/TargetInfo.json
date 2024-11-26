@@ -1,0 +1,14 @@
+{
+	"Targets": [
+		{
+			"Name": "DTP",
+			"Path": "..\\Source\\DTP.Target.cs",
+			"Type": "Game"
+		},
+		{
+			"Name": "DTPEditor",
+			"Path": "..\\Source\\DTPEditor.Target.cs",
+			"Type": "Editor"
+		}
+	]
+}
