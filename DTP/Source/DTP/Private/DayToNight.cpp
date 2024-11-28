@@ -56,7 +56,24 @@ void ADayToNight::BeginPlay()
 
 void ADayToNight::ChangeTime()
 {
+	// 상호작용 거리가 멀거나 이미 바뀌고 있는 경우
+	if (!CheckPlayerIsClose() || isTimeChange)
+		return;
+
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("SUCCEED"));
+
+	// 현재 시간이 바뀌고 있는지 여부를 참으로 바꾸고 밤낮 시간을 바꿈
+	isTimeChange = true;
+	isDay = !isDay;
+}
+
+bool ADayToNight::CheckPlayerIsClose()
+{
+	if (player == nullptr) 
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Player does not exist."));
+		return false;
+	}
 
 	// 플레이어와 해당 오브젝트 위치를 구함
 	FVector position = GetActorLocation();
@@ -65,13 +82,7 @@ void ADayToNight::ChangeTime()
 	// 플레이어와 해당 오브젝트 거리를 구함
 	float distance = FVector::Dist(position, playerPosition);
 
-	// 상호작용 거리가 멀거나 이미 바뀌고 있는 경우
-	if (distance > interactionDistance || isTimeChange)
-		return;
-
-	// 현재 시간이 바뀌고 있는지 여부를 참으로 바꾸고 밤낮 시간을 바꿈
-	isTimeChange = true;
-	isDay = !isDay;
+	return distance <= interactionDistance;
 }
 
 // Called every frame

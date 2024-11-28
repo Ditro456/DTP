@@ -38,7 +38,10 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	void ChangeTime();
+	void ChangeTime();			// 시간을 바꾸는 메소드
+
+	bool CheckPlayerIsClose();	// 플레이어가 시계와 가까운지 확인하는 메소드
+	
 
 	class AActor* player;
 	class APlayerController* playerController;
