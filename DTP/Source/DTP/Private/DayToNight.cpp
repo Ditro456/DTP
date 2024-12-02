@@ -89,4 +89,6 @@ bool ADayToNight::CheckPlayerIsClose()
 void ADayToNight::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	hasClosePlayer = CheckPlayerIsClose();
 }
