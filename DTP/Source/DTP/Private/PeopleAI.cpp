@@ -18,7 +18,7 @@ void APeopleAI::OnMoveCompleted(FAIRequestID requestID, const FPathFollowingResu
 	isWait = true;
 
 	// 타이머 설정 로그 추가
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, *FString::Printf(TEXT("Setting Timer for %f seconds"), waitTime));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, *FString::Printf(TEXT("Setting Timer for %f seconds"), waitTime));
 
 	// 대기 시간 후에 StartSearchPlayer 호출
 	GetWorld()->GetTimerManager().SetTimer(waitMoveTimer, this, &APeopleAI::ChangeWait, waitTime, false);
@@ -107,7 +107,7 @@ void APeopleAI::GenerateRandomSearchLocation()
 	if (!isSucceed)
 		return;
 	
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, *FString::Printf(TEXT("Random Location: %s"), *toLocation.ToString()));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, *FString::Printf(TEXT("Random Location: %s"), *toLocation.ToString()));
 
 	// 랜덤한 위치로 지정
 	toLocation = resultLocation.Location;

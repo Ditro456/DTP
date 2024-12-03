@@ -33,6 +33,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	bool isTimeChange = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
+	bool hasClosePlayer = false;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
