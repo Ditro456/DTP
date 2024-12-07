@@ -6,6 +6,7 @@
 #include "Components/InputComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -65,6 +66,8 @@ void ADayToNight::ChangeTime()
 	// 현재 시간이 바뀌고 있는지 여부를 참으로 바꾸고 밤낮 시간을 바꿈
 	isTimeChange = true;
 	isDay = !isDay;
+
+	Cast<ACharacter>(player)->GetCharacterMovement()->DisableMovement();
 }
 
 bool ADayToNight::CheckPlayerIsClose()
