@@ -31,7 +31,16 @@ public:
 	float maxWaitTime = 3.0f;					// 최대 대기 시간 (초)
 
 	UPROPERTY(EditAnywhere, Category = "AI")
+	float playerMaxDistance = 10000.0f;			// 플레이어부터 떨어진 거리
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+	float conversationTriggerDistance = 300.0f; // 대화를 트리거하는 거리
+
+	UPROPERTY(EditAnywhere, Category = "AI")
 	float rotationSpeed = 5.0f; // 회전 속도 (초당 도)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+	bool isTalk = false;
 
 protected:
 	void BeginPlay() override;
@@ -45,6 +54,11 @@ private:
 	void IncreaseMoveSpeed(float deltaSecond);
 	void LookAtLocation(FVector targetLocation);
 
+	void InitiateConversation();
+	void EndConversation();
+	void CheckConversationTrigger();
+	void LookAtPlayer();
+
 	class UNavigationSystemV1* navArea;						// 네비게이션 시스템
 	class UCharacterMovementComponent* movementComponent;	// 이동 관련 컴포넌트
 
@@ -54,6 +68,8 @@ private:
 
 	float maxSpeed;											// 사람의 최대 이동 속도
 	float increaseToMaxSpeedTime = 0.5f;					// 최대 속력까지 증가하는데 걸리는 시간
+
+	AActor* player;							// 플레이어
 	
 	bool isWait;
 };
