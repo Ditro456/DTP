@@ -34,6 +34,17 @@ void APeopleAI::BeginPlay()
 	// 최대 이동 속력을 저장함
 	maxSpeed = maxWalkSpeed;
 
+	player = GetWorld()->GetFirstPlayerController()->GetPawn();
+
+	if (player == nullptr)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, *FString::Printf(TEXT("Player not exist")));
+		return;
+	}
+
+	UInputComponent* playerInputComponent = player->InputComponent;
+	playerInputComponent->BindAction("Interaction", IE_Pressed, this, &APeopleAI::CheckConversationTrigger);
+
 	GenerateRandomSearchLocation();
 	StartMoveSpeed();
 	MoveTo(toLocation);
@@ -41,13 +52,31 @@ void APeopleAI::BeginPlay()
 
 void APeopleAI::Tick(float deltaSeconds)
 {
-	IncreaseMoveSpeed(deltaSeconds);
-	LookAtLocation(toLocation);
+	if (player == nullptr)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, *FString::Printf(TEXT("Player not exist")));
+		return;
+	}
+
+	FVector playerLocation = player->GetActorLocation();
+	FVector aiLocation = GetPawn()->GetActorLocation();
+
+	if (!isWait)
+	{
+		// 대화 중이 아닐 때만 이동
+		IncreaseMoveSpeed(deltaSeconds);
+		LookAtLocation(toLocation);
+	}
+
+	// 대화 중일 때 플레이어를 바라봄
+	else
+		LookAtPlayer();
 }
 
 void APeopleAI::ChangeWait()
 {
 	isWait = false;
+	isTalk = false;
 
 	GenerateRandomSearchLocation();
 	StartMoveSpeed();
@@ -97,18 +126,98 @@ void APeopleAI::LookAtLocation(FVector targetLocation)
 	monster->SetActorRotation(newRotation);
 }
 
+void APeopleAI::InitiateConversation()
+{
+	FVector playerLocation = player->GetActorLocation();
+	FVector aiLocation = GetPawn()->GetActorLocation();
+
+	// 플레이어를 바라보기
+	LookAtLocation(playerLocation);
+
+	// 이동을 멈춤
+	movementComponent->StopMovementImmediately();
+	movementComponent->MaxWalkSpeed = 0.0f;
+
+	isWait = true; // 대화 중 대기 상태로 전환
+	isTalk = true;
+
+	// 디버그 메시지 출력
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Initiating Conversation!"));
+}
+
+void APeopleAI::EndConversation()
+{
+	isWait = false;						// 대화 상태 해제
+	isTalk = false;	
+
+	StartMoveSpeed();					// 이동 속도 초기화
+	GenerateRandomSearchLocation();		// 다음 위치 생성
+	MoveTo(toLocation);					// 이동 시작
+
+	// 디버그 메시지 출력
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Ending Conversation."));
+}
+
+void APeopleAI::CheckConversationTrigger()
+{
+	FVector playerLocation = player->GetActorLocation();
+	FVector aiLocation = GetPawn()->GetActorLocation();
+
+	// 거리 계산
+	float distanceToPlayer = FVector::Dist(aiLocation, playerLocation);
+
+	// 거리 조건 확인
+	if (distanceToPlayer <= conversationTriggerDistance)
+		InitiateConversation();
+}
+
+void APeopleAI::LookAtPlayer()
+{
+	FVector playerLocation = player->GetActorLocation();
+	FVector aiLocation = GetPawn()->GetActorLocation();
+
+	// 방향 벡터 계산
+	FVector direction = (playerLocation - aiLocation).GetSafeNormal();
+	direction.Z = 0.0f; // Z축 무시 (수평 회전만 적용)
+
+	// 목표 회전 계산
+	FRotator targetRotation = FRotationMatrix::MakeFromX(direction).Rotator();
+	FRotator currentRotation = GetPawn()->GetActorRotation();
+
+	// 선형 보간으로 부드럽게 회전
+	FRotator newRotation = FMath::RInterpTo(currentRotation, targetRotation, GetWorld()->GetDeltaSeconds(), rotationSpeed);
+	GetPawn()->SetActorRotation(newRotation);
+}
+
 void APeopleAI::GenerateRandomSearchLocation()
 {
-	FNavLocation resultLocation;
+	FVector playerLocation = player->GetActorLocation();
+	float distanceToPlayer = FVector::Dist(playerLocation, GetPawn()->GetActorLocation());
 
-	// 10000.0f 범위의 랜덤한 위치를 정함
-	bool isSucceed = navArea->GetRandomReachablePointInRadius(GetPawn()->GetActorLocation(), 10000.0f, resultLocation);
+	// 플레이어로부터 일정 거리 이상 떨어져 있는 경우
+	if (distanceToPlayer > playerMaxDistance)
+	{
+		// 플레이어 주변 일정 거리 내의 랜덤한 위치를 선택
+		FNavLocation resultLocation;
+		bool isSucceed = navArea->GetRandomReachablePointInRadius(playerLocation, playerMaxDistance, resultLocation);
 
-	if (!isSucceed)
-		return;
-	
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, *FString::Printf(TEXT("Random Location: %s"), *toLocation.ToString()));
+		if (isSucceed)
+		{
+			toLocation = resultLocation.Location;
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, *FString::Printf(TEXT("Moving to player vicinity: %s"), *toLocation.ToString()));
+		}
+	}
 
-	// 랜덤한 위치로 지정
-	toLocation = resultLocation.Location;
+	else
+	{
+		// 플레이어와의 거리가 조건에 부합하지 않을 때 현재 위치 주변의 랜덤 지점을 선택
+		FNavLocation resultLocation;
+		bool isSucceed = navArea->GetRandomReachablePointInRadius(GetPawn()->GetActorLocation(), 10000.0f, resultLocation);
+
+		if (isSucceed)
+		{
+			toLocation = resultLocation.Location;
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, *FString::Printf(TEXT("Moving to random location: %s"), *toLocation.ToString()));
+		}
+	}
 }
