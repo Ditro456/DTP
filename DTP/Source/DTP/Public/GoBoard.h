@@ -69,6 +69,7 @@ private:
 	void ChangeArrowPosition();	// 화살 위치 변경
 	void PlayerPlace();			// 플레이어 두기
 	void AIPlace();
+	void SpawnAndPlaceStone(const FVector& placeRealPosition);	// 스톤 생성 및 배치 메소드 
 
 	void MoveToUp();
 	void MoveToDown();

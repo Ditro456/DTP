@@ -320,6 +320,21 @@ void AGoBoard::AIPlace()
 		return;
 	}
 
+	// AI가 생각 중임을 출력
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Magenta, TEXT("AI is thinking..."));
+
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, placeRealPosition]()
+	{
+		SpawnAndPlaceStone(placeRealPosition);
+	}, FMath::RandRange(1.0f, 5.0f), false); // 1 ~ 5초 사이의 랜덤 대기 (false는 반복 실행 안 함)
+}
+
+void AGoBoard::SpawnAndPlaceStone(const FVector& placeRealPosition)
+{
+	if (!isPlay)
+		return;
+
 	// 스폰 파라미터 설정
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = this;
