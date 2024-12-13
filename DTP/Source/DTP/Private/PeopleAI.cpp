@@ -140,9 +140,6 @@ void APeopleAI::InitiateConversation()
 
 	isWait = true; // 대화 중 대기 상태로 전환
 	isTalk = true;
-
-	// 디버그 메시지 출력
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Initiating Conversation!"));
 }
 
 void APeopleAI::EndConversation()
@@ -153,9 +150,6 @@ void APeopleAI::EndConversation()
 	StartMoveSpeed();					// 이동 속도 초기화
 	GenerateRandomSearchLocation();		// 다음 위치 생성
 	MoveTo(toLocation);					// 이동 시작
-
-	// 디버그 메시지 출력
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Ending Conversation."));
 }
 
 void APeopleAI::CheckConversationTrigger()

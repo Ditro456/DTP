@@ -170,22 +170,31 @@ void AGoBoard::FindPlayerCamera()
 		return;
 	}
 
-	// 카메라 매니저를 통해 카메라 위치와 방향을 가져올 수 있음
-	APlayerCameraManager* cameraManager = playerController->PlayerCameraManager;
-
+	// 플레이어 컨트롤러 유효성 검사
 	if (!IsValid(playerController))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Invalid PlayerController!"));
+		return;
+	}
+
+	// 카메라 매니저를 가져옴
+	APlayerCameraManager* cameraManager = playerController->PlayerCameraManager;
+	if (!IsValid(cameraManager))
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Camera Manager not found!"));
 		return;
 	}
 
-	// 카메라 컴포넌트를 반환하려면 캐릭터의 카메라 컴포넌트를 직접 가져와야 함
-	playerCamera = playerController->GetPawn();
+	// 현재 뷰포트의 카메라를 가져옴
+	playerCamera = cameraManager->GetViewTarget();
 	if (!IsValid(playerCamera))
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Active camera is not an ACameraActor."));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Active camera is not valid."));
 		return;
 	}
+
+	// 디버그 메시지로 확인
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Player camera successfully found!"));
 }
 
 void AGoBoard::Run()
@@ -195,6 +204,9 @@ void AGoBoard::Run()
 
 void AGoBoard::Clear()
 {
+	if (!isPlay)
+		return;
+
 	isPlay = false;
 	isPlayerTurn = false;
 
